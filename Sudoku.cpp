@@ -1,18 +1,18 @@
 /*
  * Sudoku.cpp
  *
- *  Created on: 24 Feb 2013
- *      Author: arjun212
+ *  Created on: 3 Mar 2013
+ *      Author: shreegovind
  */
 
 #include <iostream>
 #include <sstream>
 #include <ctime>
-#include <time.h>
+#include <fstream>
 using namespace std;
 
-int input[9][9];
-string posse[9][9];
+int input[9][9]; //multi-dimentional array which holds the sudoku
+string posse[9][9]; //multi-dimentional string array containing the number possibilities for each square
 
 struct posseVals {
 	string value;
@@ -21,15 +21,15 @@ struct posseVals {
 	bool exists;
 };
 
-void printin(int a[9][9]) {
+void printin(int a[9][9]) { //function to print the two dimensional array with sudoku
 	for (int i = 0; i < 9; i++) {
-		if ((i % 3) == 0) {
+		if ((i % 3) == 0) { //extra line every three lines
 			cout << endl << endl;
 		} else {
 			cout << endl;
 		}
 		for (int j = 0; j < 9; j++) {
-			if (((j + 1) % 3) == 0) {
+			if (((j + 1) % 3) == 0) { //extra spaces every three numbers
 				cout << a[i][j] << "   ";
 			} else {
 				cout << a[i][j] << " ";
@@ -38,15 +38,15 @@ void printin(int a[9][9]) {
 	}
 }
 
-void printstr(string a[9][9]) {
+void printstr(string a[9][9]) { //function to print the two dimensional string array with possibilities of each box, used in testing
 	for (int i = 0; i < 9; i++) {
-		if ((i % 3) == 0) {
+		if ((i % 3) == 0) { //extra line every three lines
 			cout << endl << endl;
 		} else {
 			cout << endl;
 		}
 		for (int j = 0; j < 9; j++) {
-			if (((j + 1) % 3) == 0) {
+			if (((j + 1) % 3) == 0) { //extra spaces every three numbers
 				cout << a[i][j] << "   ";
 			} else {
 				cout << a[i][j] << " ";
@@ -55,24 +55,24 @@ void printstr(string a[9][9]) {
 	}
 }
 
-string convertInt(int a) {
+string convertInt(int a) { //function to convert an integer to a string
 	stringstream ss;
 	ss << a;
 	return ss.str();
 }
 
-int convertStr(string a) {
+int convertStr(string a) { //function to convert a string to an integer
 	istringstream buffer(a);
 	int value;
 	buffer >> value;
 	return value;
 }
 
-int convertChar(char a) {
+int convertChar(char a) { //function to convert a character to an integer
 	return (a - '0');
 }
 
-void setArray(int a[9][9]) {
+void setArray(int a[9][9]) { //function to set a newly defined two dimensional array equal to the input array
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
 			a[i][j] = input[i][j];
@@ -80,7 +80,7 @@ void setArray(int a[9][9]) {
 	}
 }
 
-void setInput(int a[9][9]) {
+void setInput(int a[9][9]) { //function to set the input array equal to a separate array
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
 			input[i][j] = a[i][j];
@@ -88,7 +88,7 @@ void setInput(int a[9][9]) {
 	}
 }
 
-void setString(string a[9][9]) {
+void setString(string a[9][9]) { //function to set a newly defined two dimensional string array equal to the posse array
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
 			a[i][j] = posse[i][j];
@@ -96,7 +96,7 @@ void setString(string a[9][9]) {
 	}
 }
 
-void setArrayPosse(string a[9][9]) {
+void setArrayPosse(string a[9][9]) { //function to set the posse array equal to a separate string array
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
 			posse[i][j] = a[i][j];
@@ -104,7 +104,7 @@ void setArrayPosse(string a[9][9]) {
 	}
 }
 
-int findQuadrant(int x, int y) {
+int findQuadrant(int x, int y) { //function which given the coordinates of a square finds the origin (top left) square of the quadrant
 	int result = 0;
 	if (x < 3) {
 		result = 0;
@@ -124,17 +124,17 @@ int findQuadrant(int x, int y) {
 	return result;
 }
 
-string remove(string initial, char toremove) {
+string remove(string initial, char toremove) { //function to remove a character from a string
 	string result = "";
 	for (unsigned int i = 0; i < initial.length(); i++) {
 		if (initial[i] != toremove) {
-			result += initial[i];
+			result += initial[i]; //makes a new string with all elements of the previous string except the char to remove
 		}
 	}
 	return result;
 }
 
-string removeString(string initial, string toremove) {
+string removeString(string initial, string toremove) { //function to remove multiple characters (e.g. another string) from a string
 	string result = initial;
 	for (unsigned int i = 0; i < toremove.length(); i++) {
 		result = remove(result, toremove[i]);
@@ -142,7 +142,7 @@ string removeString(string initial, string toremove) {
 	return result;
 }
 
-bool hasChanges(int a[9][9], int b[9][9]) {
+bool hasChanges(int a[9][9], int b[9][9]) { //function to calculate and compare the total sums of all the numbers in two different sudoku arrays to see if they are different
 	int suma = 0;
 	int sumb = 0;
 	for (int i = 0; i < 9; i++) {
@@ -154,67 +154,71 @@ bool hasChanges(int a[9][9], int b[9][9]) {
 	return (suma != sumb);
 }
 
-bool update() {
+bool update() { //function to check the posse array if there are any squares with only one possibility left for which it assigns it to the input sudoku
 	int count = 0;
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
-			if (posse[i][j].length() == 1) {
+			if (posse[i][j].length() == 1) { //if the length of the posse string of a square is 1
 				if (input[i][j] == 0) {
-					count++;
+					count++; //count to inform us whether a change has taken place
 				}
-				stringstream(posse[i][j]) >> input[i][j];
+				stringstream(posse[i][j]) >> input[i][j]; //the value of the posse string is entered to the input sudoku
 			}
 		}
 	}
 	return (count > 0);
 }
 
-int duplicateR(int a[9][9], int value, int row) {
+
+int duplicateR(int a[9][9], int value, int row) { //function to check if there are any duplicate numbers in a specified row
 	int count = 0;
 	for (int i = 0; i < 9; i++) {
 		if (a[row][i] == value) {
-			count++;
+			count++; //every time the specified appears in the row, the count increases
 		}
 	}
-	if (count == 1) {
+	if (count == 1) { //if the number appears more than once in the row, it is duplicated
 		return 0;
 	} else {
 		return 1;
 	}
 }
 
-int duplicateC(int a[9][9], int value, int col) {
+
+int duplicateC(int a[9][9], int value, int col) { //function to check if there are any duplicate numbers in a specified column
 	int count = 0;
 	for (int i = 0; i < 9; i++) {
 		if (a[i][col] == value) {
-			count++;
+			count++; //every time the specified appears in the column, the count increases
 		}
 	}
-	if (count == 1) {
+	if (count == 1) { //if the number appears more than once in the row, it is duplicated
 		return 0;
 	} else {
 		return 1;
 	}
 }
 
-int duplicateS(int a[9][9], int value, int row, int col) {
-	int Ori = findQuadrant(row, col);
+
+int duplicateS(int a[9][9], int value, int row, int col) { //function to check if there are any duplicate numbers in a square
+	int Ori = findQuadrant(row, col); //finds the origin square of the quadrant
 	int count = 0;
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
 			if (a[i + ((Ori - (Ori % 10)) / 10)][j + (Ori % 10)] == value) {
-				count++;
+				count++; //every time the specified appears in the quadrant, the count increases
 			}
 		}
 	}
-	if (count == 1) {
+	if (count == 1) { //if the number appears more than once in the quadrant, it is duplicated
 		return 0;
 	} else {
 		return 1;
 	}
 }
 
-bool isSolved(int a[9][9]) {
+
+bool isSolved(int a[9][9]) { //function to check whether all of the numbers in the sudoku are filled out
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
 			if (a[i][j] == 0) {
@@ -225,11 +229,12 @@ bool isSolved(int a[9][9]) {
 	return true;
 }
 
-bool check(int a[9][9]) {
+
+bool check(int a[9][9]) { //function to check whether all the numbers entered so far are valid i.e. no duplicates
 	int count = 0;
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
-			if (a[i][j] != 0) {
+			if (a[i][j] != 0) { //for all the squares with values in them, check for duplicates
 				int val = a[i][j];
 				int row = i;
 				int col = j;
@@ -242,8 +247,9 @@ bool check(int a[9][9]) {
 	return (count == 0);
 }
 
-bool isValid(int in[9][9]) {
-	if (check(in) && isSolved(in)) {
+
+bool isValid(int in[9][9]) { //function to check a solved sudoku is valid by checking for duplicates and separate row, column and quadrant totals
+	if (check(in) && isSolved(in)) { //if the sudoku is completely filled in with out any duplicates, continue
 		int rowtot = 0, coltot = 0;
 		for (int i = 0; i < 9; i++) {
 			rowtot = 0;
@@ -252,10 +258,10 @@ bool isValid(int in[9][9]) {
 				rowtot += in[i][j];
 				coltot += in[j][i];
 			}
-			if (rowtot != 45) {
+			if (rowtot != 45) { //ensures each row total is 45
 				return false;
 			}
-			if (coltot != 45) {
+			if (coltot != 45) { //ensures each column total is 45
 				return false;
 			}
 		}
@@ -270,7 +276,7 @@ bool isValid(int in[9][9]) {
 					squatot += in[a + j][b + k];
 				}
 			}
-			if (squatot != 45) {
+			if (squatot != 45) { //ensures each quadrant total is 45
 				return false;
 			}
 		}
@@ -280,48 +286,51 @@ bool isValid(int in[9][9]) {
 	return false;
 }
 
-void simplifyR(int row) {
+
+void simplifyR(int row) { //function to remove possibilities of a square if the number exists in the row
 	string foundCells = "";
 	for (int i = 0; i < 9; i++) {
 		if (posse[row][i].length() == 1) {
-			foundCells += posse[row][i];
+			foundCells += posse[row][i]; //makes a string with all of the found values of all the squares in the row
 		}
 	}
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++) { //removes the found values from the posse strings of the rest of the squares not found in the row
 		if (posse[row][i].length() != 1) {
 			posse[row][i] = removeString(posse[row][i], foundCells);
 		}
 	}
 }
 
-void simplifyC(int col) {
+
+void simplifyC(int col) { //function to remove possibilities of a square if the number exists in the column
 	string foundCells = "";
 	for (int i = 0; i < 9; i++) {
 		if (posse[i][col].length() == 1) {
-			foundCells += posse[i][col];
+			foundCells += posse[i][col]; //makes a string with all of the found values of all the squares in the column
 		}
 	}
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++) { //removes the found values from the posse strings of the rest of the squares not found in the column
 		if (posse[i][col].length() != 1) {
 			posse[i][col] = removeString(posse[i][col], foundCells);
 		}
 	}
 }
 
-void simplifyS(int row, int col) {
-	int Ori = findQuadrant(row, col);
+
+void simplifyS(int row, int col) { //function to remove possibilities of a square if the number exists in the square
+	int Ori = findQuadrant(row, col); //find the origin square of the quadrant
 	int a = ((Ori - (Ori % 10)) / 10);
 	int b = (Ori % 10);
 	string foundCells = "";
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
 			if (posse[i + a][j + b].length() == 1) {
-				foundCells += posse[i + a][j + b];
+				foundCells += posse[i + a][j + b]; //makes a string with all of the found values of all the squares in the quadrant
 			}
 		}
 	}
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) { //removes the found values from the posse strings of the rest of the squares not found in the square
 		for (int j = 0; j < 3; j++) {
 			if (posse[i + a][j + b].length() != 1) {
 				posse[i + a][j + b] = removeString(posse[i + a][j + b],
@@ -332,7 +341,8 @@ void simplifyS(int row, int col) {
 
 }
 
-void simplify() {
+
+void simplify() { //function to remove possibilities of a square bringing together the separate row, column and square checks
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
 			simplifyR(i);
@@ -343,65 +353,68 @@ void simplify() {
 	update();
 }
 
-void singletonR(int row) {
+
+void singletonR(int row) { //function to go through the possibilities of the squares in a row and find if a number only appears once
 	string foundCells = "";
 	string foundSingles = "";
 	int count[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++) { //makes a new string with all of the possibilities of all squares (not already found) in the row
 		if (posse[row][i].length() != 1) {
 			foundCells += posse[row][i];
 		}
 	}
 
-	for (unsigned int i = 0; i < foundCells.length(); i++) {
+	for (unsigned int i = 0; i < foundCells.length(); i++) { //uses the count array which counts the number of times each number 1-9 appears and stores it in its respective array position
 		count[foundCells[i] - '1']++;
 	}
 
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++) { //goes through the count array looking for and number that only appears once
 		if (count[i] == 1) {
-			foundSingles += convertInt(i + 1);
+			foundSingles += convertInt(i + 1); //makes a string of numbers only appearing once
 		}
 	}
 
 	for (unsigned int i = 0; i < foundSingles.length(); i++) {
 		for (int j = 0; j < 9; j++) {
 			if (posse[row][j] != remove(posse[row][j], foundSingles[i])) {
-				posse[row][j] = foundSingles[i];
+				posse[row][j] = foundSingles[i]; //string is then fed into the posse string array which will be fed into the input sudoku with the update function
 			}
 		}
 	}
 }
 
-void singletonC(int col) {
+
+void singletonC(int col) { //function to go through the possibilities of the squares in a column and find if a number only appears once
 	string foundCells = "";
 	string foundSingles = "";
 	int count[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++) { //makes a new string with all of the possibilities of all squares (not already found) in the column
 		if (posse[i][col].length() != 1) {
 			foundCells += posse[i][col];
 		}
 	}
 
-	for (unsigned int i = 0; i < foundCells.length(); i++) {
+	for (unsigned int i = 0; i < foundCells.length(); i++) { //uses the count array which counts the number of times each number 1-9 appears and stores it in its respective array position
 		count[foundCells[i] - '1']++;
 	}
 
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++) { //goes through the count array looking for and number that only appears once
 		if (count[i] == 1) {
-			foundSingles += convertInt(i + 1);
+			foundSingles += convertInt(i + 1); //makes a string of numbers only appearing once
 		}
 	}
 
 	for (unsigned int i = 0; i < foundSingles.length(); i++) {
 		for (int j = 0; j < 9; j++) {
 			if (posse[j][col] != remove(posse[j][col], foundSingles[i])) {
-				posse[j][col] = foundSingles[i];
+				posse[j][col] = foundSingles[i]; //string is then fed into the posse string array which will be fed into the input sudoku with the update function
 			}
 		}
 	}
 }
 
-void singletonS(int row, int col) {
+
+void singletonS(int row, int col) { //function to go through the possibilities of the squares in a quadrant and find if a number only appears once
 	int Ori = findQuadrant(row, col);
 	int a = ((Ori - (Ori % 10)) / 10);
 	int b = (Ori % 10);
@@ -409,7 +422,7 @@ void singletonS(int row, int col) {
 	string foundSingles = "";
 	int count[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) { //makes a new string with all of the possibilities of all squares (not already found) in the square
 		for (int j = 0; j < 3; j++) {
 			if (posse[i + a][j + b].length() != 1) {
 				foundCells += posse[i + a][j + b];
@@ -417,18 +430,18 @@ void singletonS(int row, int col) {
 		}
 	}
 
-	for (unsigned int i = 0; i < foundCells.length(); i++) {
+	for (unsigned int i = 0; i < foundCells.length(); i++) { //uses the count array which counts the number of times each number 1-9 appears and stores it in its respective array position
 		count[foundCells[i] - '1']++;
 	}
 
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++) { //goes through the count array looking for and number that only appears once
 		if (count[i] == 1) {
-			foundSingles += convertInt(i + 1);
+			foundSingles += convertInt(i + 1); //makes a string of numbers only appearing once
 		}
 	}
 
 	for (unsigned int i = 0; i < foundSingles.length(); i++) {
-		for (int j = 0; j < 3; j++) {
+		for (int j = 0; j < 3; j++) { //string is then fed into the posse string array which will be fed into the input sudoku with the update function
 			for (int k = 0; k < 3; k++) {
 				if (posse[j + a][k + b]
 						!= remove(posse[j + a][k + b], foundSingles[i])) {
@@ -440,41 +453,41 @@ void singletonS(int row, int col) {
 	}
 }
 
-void singleton() {
+
+void singleton() { //function to go through the possibilities of the squares to find if a number only appears once combining the separate row, column and quadrant functions
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
+			simplify();
 			singletonR(i);
-			simplify();
 			singletonC(j);
-			simplify();
 			singletonS(i, j);
-			simplify();
 		}
 		simplify();
 	}
 	update();
 }
 
-bool backtrack(int a[9][9]);
+bool backtrack(int a[9][9]); //early declaration for the backtracking function
 
-bool solveSudoku() {
-	int b[9][9];
-	setArray(b);
+
+bool solveSudoku() { //combines the various different functions above in loops to solve the sudoku
+	int a[9][9];
+	setArray(a);
 	singleton();
-	setArray(b);
 	update();
-	while (hasChanges(input, b)) {
-		setArray(b);
+	while (hasChanges(input, a)) { //while the sudoku is changing, keep applying the singleton and simplify functions to solve it
+		setArray(a);
 		singleton();
 		update();
 	}
-	if (!isSolved(input)) {
+	if (!isSolved(input)) { //once it is no longer changing but is not solved, start the backtracking function
 		backtrack(input);
 	}
 	return (isSolved(input));
 }
 
-posseVals findUnassigned(int a[9][9]) {
+
+posseVals findUnassigned(int a[9][9]) { //function to find a square without an assigned value
 	bool unassignedFound = false;
 	int i = 0;
 	int j = 0;
@@ -487,7 +500,7 @@ posseVals findUnassigned(int a[9][9]) {
 				unassignedFound = true;
 				result.row = i;
 				result.col = j;
-				//result.value = posse[i][j];
+				result.value = posse[i][j];
 				result.exists = true;
 			}
 			j++;
@@ -497,7 +510,8 @@ posseVals findUnassigned(int a[9][9]) {
 	return result;
 }
 
-bool backtrack(int a[9][9]) {
+
+bool backtrack(int a[9][9]) { //function to guess a value when at a stand still which if correct will continue otherwise will "backtrack" to the last correctly made decision
 	int row;
 	int col;
 	int b[9][9];
@@ -508,7 +522,7 @@ bool backtrack(int a[9][9]) {
 	}
 	row = findUnassigned(b).row;
 	col = findUnassigned(b).col;
-	for (int i = 1; i < 10; i++) {
+	for (int i = 1; i < 10; i++) { //BACKTRACKING WHERE YOU CHECK VALUES FROM 1 TO 9
 		b[row][col] = i;
 		setInput(b);
 		if (check(b)) {
@@ -520,210 +534,95 @@ bool backtrack(int a[9][9]) {
 			}
 		}
 	}
+//	string pos = posse[row][col];							//BACKTRACKING WHERE YOU CHECK USING POSSIBLE (POSSE) VALUES (DOES NOT WORK CORRECTLY)
+//	for (unsigned int i = 0; i < pos.length(); i++) {
+//		b[row][col] = convertChar(pos[i]);
+//		setInput(b);
+//		if (check(b)) {
+//			if (backtrack(b)) {
+//				return true;
+//			} else {
+//				input[row][col] = 0;
+//				b[row][col] = 0;
+//			}
+//		}
+//	}
 	return false;
 }
 
-int main() {
 
-	for (int i = 0; i < 9; i++) {
+void inputsudoku() { //function to input the sudoku from the user using files
+	string name = "";
+	cout << "Enter the sudoku input file name: ";
+	cin >> name;
+	ifstream myfile(name.c_str());
+	string lines[9] = { "", "", "", "", "", "", "", "", "" };
+	string line;
+	int i = 0;
+	if (!myfile) {
+		cout << endl << "Could not open file : " << name;
+	}
+	myfile.clear(); //SETS FILE TO THE START
+	myfile.seekg(0, ios::beg); //SETS FILE TO THE STARTx
+
+	while (getline(myfile, line)) { //reading the file for the sudoku
+		lines[i] = line;
+		i++;
+	}
+	myfile.close();
+
+	for (int i = 0; i < 9; i++) { //setting the posse string array
 		for (int j = 0; j < 9; j++) {
-			input[i][j] = 0;
-			posse[i][j] = "123456789";
+			posse[i][j] = lines[i][j];
+			if (convertStr(posse[i][j]) == 0) {
+				posse[i][j] = "123456789";
+			}
 		}
 	}
-
-	///*
-
-	input[0][0] = 8;
-	input[2][1] = 7;
-	input[3][1] = 5;
-	input[8][1] = 9;
-	input[1][2] = 3;
-	input[6][2] = 1;
-	input[7][2] = 8;
-	input[1][3] = 6;
-	input[5][3] = 1;
-	input[7][3] = 5;
-	input[2][4] = 9;
-	input[4][4] = 4;
-	input[3][5] = 7;
-	input[4][5] = 5;
-	input[2][6] = 2;
-	input[4][6] = 7;
-	input[8][6] = 4;
-	input[5][7] = 3;
-	input[6][7] = 6;
-	input[7][7] = 1;
-	input[6][8] = 8;
-
-	posse[0][0] = "8";
-	posse[2][1] = "7";
-	posse[3][1] = "5";
-	posse[8][1] = "9";
-	posse[1][2] = "3";
-	posse[6][2] = "1";
-	posse[7][2] = "8";
-	posse[1][3] = "6";
-	posse[5][3] = "1";
-	posse[7][3] = "5";
-	posse[2][4] = "9";
-	posse[4][4] = "4";
-	posse[3][5] = "7";
-	posse[4][5] = "5";
-	posse[2][6] = "2";
-	posse[4][6] = "7";
-	posse[8][6] = "4";
-	posse[5][7] = "3";
-	posse[6][7] = "6";
-	posse[7][7] = "1";
-	posse[6][8] = "8";
-
-	//*/
-
-	/*
-
-	 input[0][0] = 1;
-	 input[1][0] = 2;
-	 input[4][0] = 8;
-	 input[8][0] = 3;
-	 input[3][1] = 5;
-	 input[4][1] = 2;
-	 input[8][1] = 6;
-	 input[2][2] = 8;
-	 input[6][2] = 7;
-	 input[7][3] = 3;
-	 input[0][4] = 4;
-	 input[1][4] = 5;
-	 input[4][4] = 6;
-	 input[7][4] = 8;
-	 input[8][4] = 9;
-	 input[1][5] = 9;
-	 input[2][6] = 2;
-	 input[6][6] = 1;
-	 input[0][7] = 7;
-	 input[4][7] = 9;
-	 input[5][7] = 8;
-	 input[0][8] = 6;
-	 input[4][8] = 3;
-	 input[7][8] = 9;
-	 input[8][8] = 2;
-
-	 posse[0][0] = "1";
-	 posse[1][0] = "2";
-	 posse[4][0] = "8";
-	 posse[8][0] = "3";
-	 posse[3][1] = "5";
-	 posse[4][1] = "2";
-	 posse[8][1] = "6";
-	 posse[2][2] = "8";
-	 posse[6][2] = "7";
-	 posse[7][3] = "3";
-	 posse[0][4] = "4";
-	 posse[1][4] = "5";
-	 posse[4][4] = "6";
-	 posse[7][4] = "8";
-	 posse[8][4] = "9";
-	 posse[1][5] = "9";
-	 posse[2][6] = "2";
-	 posse[6][6] = "1";
-	 posse[0][7] = "7";
-	 posse[4][7] = "9";
-	 posse[5][7] = "8";
-	 posse[0][8] = "6";
-	 posse[4][8] = "3";
-	 posse[7][8] = "9";
-	 posse[8][8] = "2";
-
-	 */
-
-	/*
-
-	 input[0][0] = 1;
-	 input[1][0] = 9;
-	 input[4][0] = 4;
-	 input[8][0] = 2;
-	 input[3][1] = 1;
-	 input[4][1] = 8;
-	 input[8][1] = 4;
-	 input[2][2] = 5;
-	 input[6][2] = 9;
-	 input[7][3] = 3;
-	 input[0][4] = 3;
-	 input[1][4] = 4;
-	 input[4][4] = 6;
-	 input[7][4] = 7;
-	 input[8][4] = 8;
-	 input[1][5] = 5;
-	 input[2][6] = 3;
-	 input[6][6] = 1;
-	 input[0][7] = 9;
-	 input[4][7] = 5;
-	 input[5][7] = 7;
-	 input[0][8] = 6;
-	 input[4][8] = 3;
-	 input[7][8] = 8;
-	 input[8][8] = 9;
-
-	 posse[0][0] = "1";
-	 posse[1][0] = "9";
-	 posse[4][0] = "4";
-	 posse[8][0] = "2";
-	 posse[3][1] = "1";
-	 posse[4][1] = "8";
-	 posse[8][1] = "4";
-	 posse[2][2] = "5";
-	 posse[6][2] = "9";
-	 posse[7][3] = "3";
-	 posse[0][4] = "3";
-	 posse[1][4] = "4";
-	 posse[4][4] = "6";
-	 posse[7][4] = "7";
-	 posse[8][4] = "8";
-	 posse[1][5] = "5";
-	 posse[2][6] = "3";
-	 posse[6][6] = "1";
-	 posse[0][7] = "9";
-	 posse[4][7] = "5";
-	 posse[5][7] = "7";
-	 posse[0][8] = "6";
-	 posse[4][8] = "3";
-	 posse[7][8] = "8";
-	 posse[8][8] = "9";
-
-	 */
-
+	update(); //sets the input array
+	simplify();
+	cout << endl << endl << "Input sudoku: ";
 	printin(input);
+}
 
-	int b[9][9];
-	setArray(b);
 
-	cout << endl;
-	cout << endl;
+int main() {
 
+	inputsudoku();
+
+	int in1[9][9];
+	int in2[9][9];
+	setArray(in1);
+	setArray(in2);
+
+	cout << endl << endl << endl;
+
+	setInput(in1); //solves and times the sudoku using the singleton and simplify functions
 	clock_t time = clock();
-	time = clock();
-	solveSudoku();
+	if (check(input)) {
+		solveSudoku();
+	} else {
+		cout << "Sudoku is not valid" << endl << endl;
+	}
 	time = clock() - time;
 	cout << "Time taken for execution with simplification is "
-			<< (((float) time) / CLOCKS_PER_SEC);
+			<< (((float) time) / CLOCKS_PER_SEC) << " seconds";
 
-	cout << endl;
-	cout << endl;
+	cout << endl << endl;
 
+	setInput(in2); //solves and times the sudoku using only the backtracking function
 	clock_t time1 = clock();
-	time1 = clock();
-	backtrack(b);
+	if (check(input)) {
+		backtrack(input);
+	}
 	time1 = clock() - time1;
 	cout << "Time taken for execution with backtracking is "
-			<< (((float) time1) / CLOCKS_PER_SEC);
+			<< (((float) time1) / CLOCKS_PER_SEC) << " seconds";
 
-	cout << endl;
-	cout << endl;
+	cout << endl << endl << endl;
 
+	cout << "Output sudoku: ";
 	printin(input);
-
-	cout << endl;
-	cout << endl;
 
 	return 0;
 }
